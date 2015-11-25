@@ -209,29 +209,17 @@ class NavbarHorizontal extends Component {
 	 * @return string
 	 */
 	protected function buildNavBarElementFromDomElement( $node ) {
-		switch ( $node->getAttribute( 'type' ) ) {
-			case 'Logo':
-				$html = $this->getLogo( $node );
-				break;
-			case 'NavMenu':
-				$html = $this->getNavMenu( $node );
-				break;
-			case 'PageTools':
-				$html = $this->getPageTools( $node );
-				break;
-			case 'SearchBar':
-				$html = $this->getSearchBar( $node );
-				break;
-			case 'PersonalTools':
-				$html = $this->getPersonalTools();
-				break;
-			case 'Menu':
-				$html = $this->getMenu( $node );
-				break;
-			default:
-				$html = '';
+
+		$type = $node->getAttribute( 'type' );
+		$functionName = 'get' . $type;
+
+		if (method_exists($this, $functionName)) {
+			return $this->{$functionName}($node);
+		} else {
+			$className = __NAMESPACE__ . '\\' . $type;
+			$component = new $className( $this->getSkinTemplate(), $node, $this->getIndent() );
+			return '<ul class="nav navbar-nav ' . $type . '">' . $component->getHtml() . "</ul>\n";
 		}
-		return $html;
 	}
 
 	/**
@@ -437,6 +425,7 @@ class NavbarHorizontal extends Component {
 		return '<ul class="nav navbar-nav">' . $menu->getHtml() . "</ul>\n";
 
 	}
+
 
 	/**
 	 * @param string[] $headElements
